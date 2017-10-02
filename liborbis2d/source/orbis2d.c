@@ -2,10 +2,14 @@
 #include <stdlib.h>
 #include <sys/param.h>
 #include <kernel.h>
+#include <types/event.h>
+
+
 #include <gnmdriver.h>
 #include <systemservice.h>
 #include <videoout.h>
 #include <types/userservice.h>
+
 #include "orbis2d.h"
 #include "logdebug.h"
 
@@ -53,10 +57,10 @@ int orbis2dCreateConf()
 		orbconf->width=ATTR_WIDTH;
 		orbconf->pitch=ATTR_WIDTH;
 		orbconf->height=ATTR_HEIGHT;
-		orbconf->pixelFormat=SCE_VIDEO_OUT_PIXEL_FORMAT_A8R8G8B8_SRGB;
+		orbconf->pixelFormat=0x80000000;
 		orbconf->bytesPerPixel=4;
-		orbconf->tilingMode=SCE_VIDEO_OUT_TILING_MODE_LINEAR;
-		orbconf->flipMode=ORBIS2D_FLIP_MODE;
+		orbconf->tilingMode=ORBIS2D_MODE_LINEAR;
+		orbconf->flipMode=ORBIS2D_FLIP_MODE_VSYNC;
 		orbconf->flipRate=ORBIS2D_FLIP_RATE;
 		orbconf->videoHandle=-1;
 		orbconf->currentBuffer=0;
@@ -160,7 +164,7 @@ void orbis2dStartDrawing()
 	orbis2dWaitFlipArg(&orbconf->flipQueue);
 
 }
-void orbis2dWritePixelColor(int x, int y, uint32_t pixelColor)
+void orbis2dDrawPixelColor(int x, int y, uint32_t pixelColor)
 {
 	int color;
 	int pixel = (y * orbconf->pitch) + x;
@@ -178,7 +182,7 @@ void orbis2dDrawRectColor(int x, int w, int y, int h, uint32_t color)
 	{
 		for(x0=x;x0<x+w;x0++) 
 		{
-			orbis2dWritePixelColor(x0,y0,color);
+			orbis2dDrawPixelColor(x0,y0,color);
 		}
 	}
 }
@@ -223,7 +227,7 @@ int orbis2dInitDisplayBuffer(int num, int bufIndexStart)
 {
 	SceVideoOutBufferAttribute attr;
 	int ret;
-	sceVideoOutSetBufferAttribute(&attr,orbconf->pixelFormat,orbconf->tilingMode,SCE_VIDEO_OUT_ASPECT_RATIO_16_9,orbconf->width,orbconf->height,orbconf->pitch);
+	sceVideoOutSetBufferAttribute(&attr,orbconf->pixelFormat,orbconf->tilingMode,0,orbconf->width,orbconf->height,orbconf->pitch);
 
 	sys_log("liborbis2d sceVideoOutSetBufferAttribute done\n");
 	
@@ -240,7 +244,7 @@ int orbis2dInitMemory()
 
 	const uint32_t align=2*1024*1024;
 
-	ret=sceKernelAllocateDirectMemory(0,sceKernelGetDirectMemorySize(),orbconf->videoMemStackSize,align,SCE_KERNEL_WC_GARLIC,&start);
+	ret=sceKernelAllocateDirectMemory(0,sceKernelGetDirectMemorySize(),orbconf->videoMemStackSize,align,3,&start);
 	if(ret==0)
 	{
 
@@ -248,7 +252,7 @@ int orbis2dInitMemory()
 
 		void* pointer=NULL;
 		
-		ret=sceKernelMapDirectMemory(&pointer,orbconf->videoMemStackSize,SCE_KERNEL_PROT_CPU_READ|SCE_KERNEL_PROT_CPU_WRITE|SCE_KERNEL_PROT_GPU_READ|SCE_KERNEL_PROT_GPU_ALL,0,start,align);
+		ret=sceKernelMapDirectMemory(&pointer,orbconf->videoMemStackSize,0x33,0,start,align);
 		if(ret==0)
 		{
 			orbconf->videoMemStackBaseAddr=(uintptr_t)pointer;
@@ -264,7 +268,7 @@ int orbis2dInitVideoHandle()
 	int handle;
 	int ret;
 
-	handle=sceVideoOutOpen(SCE_USER_SERVICE_USER_ID_SYSTEM, SCE_VIDEO_OUT_BUS_TYPE_MAIN, 0, NULL);
+	handle=sceVideoOutOpen(0xff, 0, 0, NULL);
 	
 	if(handle<0)
 	{
@@ -343,7 +347,7 @@ int orbis2dInit()
 			// set status of each buffer with flipArg
 			for(bufIndex=0;bufIndex<ORBIS2D_DISPLAY_BUFFER_NUM;bufIndex++) 
 			{
-				orbconf->flipArgLog[bufIndex]= SCE_VIDEO_OUT_BUFFER_INITIAL_FLIP_ARG-1; 
+				orbconf->flipArgLog[bufIndex]= -2; 
 			}
 
 			// prepare initial clear color to the display buffers

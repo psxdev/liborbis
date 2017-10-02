@@ -28,7 +28,7 @@ void updateController()
 	if(ret==0)
 	{
 		
-		if(orbisPadGetButton(SCE_PAD_BUTTON_UP))
+		if(orbisPadGetButton(ORBISPAD_UP))
 		{
 			if(y-step>=0)
 			{
@@ -39,7 +39,7 @@ void updateController()
 				y=0;
 			}
 		}
-		if(orbisPadGetButton(SCE_PAD_BUTTON_DOWN))
+		if(orbisPadGetButton(ORBISPAD_DOWN))
 		{
 			if(y+step<conf->height-1)
 			{
@@ -50,7 +50,7 @@ void updateController()
 				y=conf->height-1-step;
 			}
 		}						
-		if(orbisPadGetButton(SCE_PAD_BUTTON_RIGHT))
+		if(orbisPadGetButton(ORBISPAD_RIGHT))
 		{
 			if(x+step<conf->width-1)
 			{
@@ -61,7 +61,7 @@ void updateController()
 				x=conf->width-1-step;
 			}
 		}
-		if(orbisPadGetButton(SCE_PAD_BUTTON_LEFT))
+		if(orbisPadGetButton(ORBISPAD_LEFT))
 		{
 			if(x-step>=0)
 			{
@@ -72,21 +72,21 @@ void updateController()
 				x=0;
 			}
 		}
-		if(orbisPadGetButton(SCE_PAD_BUTTON_TRIANGLE))
+		if(orbisPadGetButton(ORBISPAD_TRIANGLE))
 		{
 			sys_log("Triangle pressed exit\n");
 			
 			flag=0;
 				
 		}
-		if(orbisPadGetButton(SCE_PAD_BUTTON_CIRCLE))
+		if(orbisPadGetButton(ORBISPAD_CIRCLE))
 		{
 			sys_log("Circle pressed reset position and color red\n");
 			x=1280/2;
 			y=720/2;
 			color=0x80ff0000;	
 		}
-		if(orbisPadGetButton(SCE_PAD_BUTTON_CROSS))
+		if(orbisPadGetButton(ORBISPAD_CROSS))
 		{
 			sys_log("Cross pressed rand color\n");
 			R=rand()%256;
@@ -95,7 +95,7 @@ void updateController()
 			color=0x80000000|R<<16|G<<8|B;
 			
 		}
-		if(orbisPadGetButton(SCE_PAD_BUTTON_SQUARE))
+		if(orbisPadGetButton(ORBISPAD_SQUARE))
 		{
 			sys_log("Square pressed\n");
 			
