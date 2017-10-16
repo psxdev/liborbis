@@ -6,6 +6,11 @@
 #include <logdebug.h>
 #include <orbis2d.h>
 #include <orbisPad.h>
+#include <orbisAudio.h>
+#include <modplayer.h>
+#include <ps4link.h>
+#include <debugnet.h>
+
 
 int x=1280/2;
 int y=720/2;
@@ -17,7 +22,7 @@ int step=10;
 int64_t flipArg=0;
 int R,G,B;
 uint32_t color=0x80ff0000;
-int flag=1;
+int flag=0;
 
 Orbis2dConfig *conf;
 
@@ -85,6 +90,8 @@ void updateController()
 			x=1280/2;
 			y=720/2;
 			color=0x80ff0000;	
+			orbisAudioResume(0);
+			
 		}
 		if(orbisPadGetButton(ORBISPAD_CROSS))
 		{
@@ -93,69 +100,125 @@ void updateController()
 			G=rand()%256;
 			B=rand()%256;
 			color=0x80000000|R<<16|G<<8|B;
+			orbisAudioStop();
 			
 		}
 		if(orbisPadGetButton(ORBISPAD_SQUARE))
 		{
 			sys_log("Square pressed\n");
+			orbisAudioPause(0);
 			
 		}
 			
 	}
 }
-int main(uint64_t stackbase, uint64_t othervalue) 
+void finishApp()
+{
+	orbisAudioFinish();
+	orbisPadFinish();
+	
+	orbis2dFinish();
+	
+	ps4LinkFinish();
+		
+}
+void initApp()
 {
 	int ret;
 
+	ret=ps4LinkInit("192.168.1.3",0x4711,0x4712,0x4712,DEBUG);
+	if(!ret)
+	{
+		ps4LinkFinish();
+		return;
+	}
+	while(!ps4LinkRequestsIsConnected())
+	{
+		
+	}
+	debugNetPrintf(DEBUG,"[PS4LINK] Initialized and connected from pc/mac ready to receive commands\n");
 	
 	//hide playroom splash
 	sceSystemServiceHideSplashScreen();
-	//init pad
+	
+	
 	ret=orbisPadInit();
 	
 	if(ret==1)
 	{
 		
-		ret=orbis2dInit();
 	
+	
+		ret=orbis2dInit();
 		if(ret==1)
 		{
 			conf=orbis2dGetConf();
-			while(flag)
+			flag=1;
+			ret=orbisAudioInit();
+			if(ret==1)
 			{
-				//capture pad data and populate positions
-				// X random color
-				// O reset to center position and red color
-				// /\ to exit
-				// dpad move rectangle
-				updateController();
-				
-				
-				//wait for current display buffer
-				orbis2dStartDrawing();
-
-				// clear with background (default white) to the current display buffer 
-				orbis2dClearBuffer();
-				
-				//default red is here press X to random color
-				orbis2dDrawRectColor(x,w,y,h,color);
-				
-				//flush and flip
-				orbis2dFinishDrawing(flipArg);
-				
-				//swap buffers
-				orbis2dSwapBuffers();
-				flipArg++;
+				ret=orbisAudioInitChannel(ORBISAUDIO_CHANNEL_MAIN,1024,48000,ORBISAUDIO_FORMAT_S16_STEREO);
 			}
-			
-			orbis2dFinish();
-			orbisPadFinish();
 		}
-		
-	}	
+	}
+	
+}
+int main(uint64_t stackbase, uint64_t othervalue) 
+{
+	int ret;
 
+	initApp();
+	
+	Mod_Init(0);
+	Mod_Load("host0:zweifeld.mod");
+	Mod_Play();
+    orbisAudioResume(0);
+	
+	
+	
+	
+	while(flag)
+	{
+		//capture pad data and populate positions
+		// X random color
+		// O reset to center position and red color
+		// /\ to exit
+		// dpad move rectangle
+		updateController();
+				
+				
+		//wait for current display buffer
+		orbis2dStartDrawing();
 
+		// clear with background (default white) to the current display buffer 
+		orbis2dClearBuffer();
+				
+		//default red is here press X to random color
+		orbis2dDrawRectColor(x,w,y,h,color);
+				
+		//flush and flip
+		orbis2dFinishDrawing(flipArg);
+				
+		//swap buffers
+		orbis2dSwapBuffers();
+		flipArg++;
+	}
+	
+	orbisAudioResume(0);
+	Mod_End();
+	//wait for current display buffer
+	orbis2dStartDrawing();
 
+	// clear with background (default white) to the current display buffer 
+	orbis2dClearBuffer();
+					
+	//flush and flip
+	orbis2dFinishDrawing(flipArg);
+			
+	//swap buffers
+	orbis2dSwapBuffers();
+	
+	finishApp();
 
 	exit(0);
 
