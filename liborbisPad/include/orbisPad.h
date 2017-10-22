@@ -29,7 +29,11 @@
 typedef struct OrbisPadConfig
 {
 	SceUserServiceUserId userId;
-	ScePadData *padData;
+	ScePadData *padDataCurrent;
+	ScePadData *padDataLast;
+	unsigned int buttonsPressed;
+	unsigned int buttonsReleased;
+	unsigned int buttonsHold;
 	int padHandle;
 	int orbispad_initialized;
 	
@@ -41,5 +45,11 @@ OrbisPadConfig *orbisPadGetConf();
 int orbisPadCreateConf();
 int orbisPadSetConf(OrbisPadConfig *conf);
 int orbisPadInitWithConf(OrbisPadConfig *conf);
-bool orbisPadGetButton(unsigned int filter);
+bool orbisPadGetButtonHold(unsigned int filter);
+bool orbisPadGetButtonPressed(unsigned int filter);
+bool orbisPadGetButtonReleased(unsigned int filter);
+unsigned int orbisPadGetCurrentButtonsPressed();
+unsigned int orbisPadGetCurrentButtonsReleased();
+void orbisPadSetCurrentButtonsPressed(unsigned int buttons);
+void orbisPadSetCurrentButtonsReleased(unsigned int buttons);
 int orbisPadUpdate();

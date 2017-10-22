@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 #include <userservice.h>
 #include <pad.h>
@@ -44,7 +45,14 @@ int orbisPadCreateConf()
 		
 		orbisPadConf->userId=0;
 		orbisPadConf->padHandle=-1;
-		orbisPadConf->padData=(ScePadData *)malloc(sizeof(ScePadData));
+		
+		orbisPadConf->padDataCurrent=(ScePadData *)malloc(sizeof(ScePadData));
+		orbisPadConf->padDataLast=(ScePadData *)malloc(sizeof(ScePadData));
+		
+		orbisPadConf->buttonsPressed=0;
+		orbisPadConf->buttonsReleased=0;
+		orbisPadConf->buttonsHold=0;
+		
 		orbisPadConf->orbispad_initialized=-1;
 		
 		return 0;
@@ -84,17 +92,66 @@ int orbisPadInitWithConf(OrbisPadConfig *conf)
 		return 0;
 	}
 }
-bool orbisPadGetButton(unsigned int filter)
+unsigned int orbisPadGetCurrentButtonsPressed()
 {
-	return (orbisPadConf->padData->buttons&filter ? 1 : 0);
+	return orbisPadConf->buttonsPressed;
+}
+void orbisPadSetCurrentButtonsPressed(unsigned int buttons)
+{
+	orbisPadConf->buttonsPressed=buttons;
+}
+unsigned int orbisPadGetCurrentButtonsReleased()
+{
+	return orbisPadConf->buttonsReleased;
+}
+void orbisPadSetCurrentButtonsReleased(unsigned int buttons)
+{
+	orbisPadConf->buttonsReleased=buttons;
 }
 
+bool orbisPadGetButtonHold(unsigned int filter)
+{
+	if((orbisPadConf->buttonsHold&filter)==filter)
+	{
+		return 1;
+	}
+	return 0;
+}
+bool orbisPadGetButtonPressed(unsigned int filter)
+{
+	if((orbisPadConf->buttonsPressed&filter)==filter)
+	{
+		return 1;
+	}
+	return 0;
+}
+bool orbisPadGetButtonReleased(unsigned int filter)
+{
+ 	if((orbisPadConf->buttonsReleased&filter)==filter)
+	{
+		return 1;
+	}
+	return 0;
+}
 int orbisPadUpdate()
 {
 	int ret;
-	ret=scePadReadState(orbisPadConf->padHandle,orbisPadConf->padData);
-	if(ret==0 && orbisPadConf->padData->connected==1)
+	unsigned int actualButtons=0;
+	unsigned int lastButtons=0;
+	memcpy(orbisPadConf->padDataLast,orbisPadConf->padDataCurrent,sizeof(ScePadData));
+	
+	ret=scePadReadState(orbisPadConf->padHandle,orbisPadConf->padDataCurrent);
+	
+	if(ret==0 && orbisPadConf->padDataCurrent->connected==1)
 	{
+		actualButtons=orbisPadConf->padDataCurrent->buttons;
+		lastButtons=orbisPadConf->padDataLast->buttons;
+		orbisPadConf->buttonsPressed=(actualButtons)&(~lastButtons);
+		if(actualButtons!=lastButtons)
+		{
+			orbisPadConf->buttonsReleased=(~actualButtons)&(lastButtons);
+		}
+		orbisPadConf->buttonsHold=actualButtons&lastButtons;
 		return 0;
 		
 	}
@@ -158,3 +215,4 @@ int orbisPadInit()
    
     return orbisPadConf->orbispad_initialized;
 }
+

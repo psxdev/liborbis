@@ -25,16 +25,52 @@ uint32_t color=0x80ff0000;
 int flag=0;
 
 Orbis2dConfig *conf;
+OrbisPadConfig *confPad;
+
 
 void updateController()
 {
 	int ret;
+	unsigned int buttons=0;
 	ret=orbisPadUpdate();
 	if(ret==0)
 	{
-		
-		if(orbisPadGetButton(ORBISPAD_UP))
+		if(orbisPadGetButtonPressed(ORBISPAD_L2|ORBISPAD_R2) || orbisPadGetButtonHold(ORBISPAD_L2|ORBISPAD_R2))
 		{
+			sys_log("Combo L2R2 pressed\n");
+			buttons=orbisPadGetCurrentButtonsPressed();
+			buttons&= ~(ORBISPAD_L2|ORBISPAD_R2);
+			orbisPadSetCurrentButtonsPressed(buttons);
+		}
+		if(orbisPadGetButtonPressed(ORBISPAD_L1|ORBISPAD_R1) )
+		{
+			sys_log("Combo L1R1 pressed\n");
+			buttons=orbisPadGetCurrentButtonsPressed();
+			buttons&= ~(ORBISPAD_L1|ORBISPAD_R1);
+			orbisPadSetCurrentButtonsPressed(buttons);
+			
+		}
+		if(orbisPadGetButtonPressed(ORBISPAD_L1|ORBISPAD_R2) || orbisPadGetButtonHold(ORBISPAD_L1|ORBISPAD_R2))
+		{
+			sys_log("Combo L1R2 pressed\n");
+			buttons=orbisPadGetCurrentButtonsPressed();
+			buttons&= ~(ORBISPAD_L1|ORBISPAD_R2);
+			orbisPadSetCurrentButtonsPressed(buttons);
+			
+			
+		}
+		if(orbisPadGetButtonPressed(ORBISPAD_L2|ORBISPAD_R1) || orbisPadGetButtonHold(ORBISPAD_L2|ORBISPAD_R1) )
+		{
+			sys_log("Combo L2R1 pressed\n");
+			buttons=orbisPadGetCurrentButtonsPressed();
+			buttons&= ~(ORBISPAD_L2|ORBISPAD_R1);
+			orbisPadSetCurrentButtonsPressed(buttons);
+			
+		}
+		if(orbisPadGetButtonPressed(ORBISPAD_UP) || orbisPadGetButtonHold(ORBISPAD_UP))
+		{
+			sys_log("Up pressed\n");
+			
 			if(y-step>=0)
 			{
 				y=y-step;
@@ -44,8 +80,10 @@ void updateController()
 				y=0;
 			}
 		}
-		if(orbisPadGetButton(ORBISPAD_DOWN))
+		if(orbisPadGetButtonPressed(ORBISPAD_DOWN) || orbisPadGetButtonHold(ORBISPAD_DOWN))
 		{
+			sys_log("Down pressed\n");
+			
 			if(y+step<conf->height-1)
 			{
 				y=y+step;
@@ -55,8 +93,10 @@ void updateController()
 				y=conf->height-1-step;
 			}
 		}						
-		if(orbisPadGetButton(ORBISPAD_RIGHT))
+		if(orbisPadGetButtonPressed(ORBISPAD_RIGHT) || orbisPadGetButtonHold(ORBISPAD_RIGHT))
 		{
+			sys_log("Right pressed\n");
+			
 			if(x+step<conf->width-1)
 			{
 				x=x+step;
@@ -66,8 +106,10 @@ void updateController()
 				x=conf->width-1-step;
 			}
 		}
-		if(orbisPadGetButton(ORBISPAD_LEFT))
+		if(orbisPadGetButtonPressed(ORBISPAD_LEFT) || orbisPadGetButtonHold(ORBISPAD_LEFT))
 		{
+			sys_log("Left pressed\n");
+			
 			if(x-step>=0)
 			{
 				x=x-step;
@@ -77,14 +119,14 @@ void updateController()
 				x=0;
 			}
 		}
-		if(orbisPadGetButton(ORBISPAD_TRIANGLE))
+		if(orbisPadGetButtonPressed(ORBISPAD_TRIANGLE))
 		{
 			sys_log("Triangle pressed exit\n");
 			
 			flag=0;
 				
 		}
-		if(orbisPadGetButton(ORBISPAD_CIRCLE))
+		if(orbisPadGetButtonPressed(ORBISPAD_CIRCLE))
 		{
 			sys_log("Circle pressed reset position and color red\n");
 			x=1280/2;
@@ -93,7 +135,7 @@ void updateController()
 			orbisAudioResume(0);
 			
 		}
-		if(orbisPadGetButton(ORBISPAD_CROSS))
+		if(orbisPadGetButtonPressed(ORBISPAD_CROSS))
 		{
 			sys_log("Cross pressed rand color\n");
 			R=rand()%256;
@@ -103,12 +145,33 @@ void updateController()
 			orbisAudioStop();
 			
 		}
-		if(orbisPadGetButton(ORBISPAD_SQUARE))
+		if(orbisPadGetButtonPressed(ORBISPAD_SQUARE))
 		{
 			sys_log("Square pressed\n");
 			orbisAudioPause(0);
 			
 		}
+		if(orbisPadGetButtonPressed(ORBISPAD_L1))
+		{
+			sys_log("L1 pressed\n");
+			
+		}
+		if(orbisPadGetButtonPressed(ORBISPAD_L2))
+		{
+			sys_log("L2 pressed\n");
+			
+		}
+		if(orbisPadGetButtonPressed(ORBISPAD_R1))
+		{
+			sys_log("R1 pressed\n");
+			
+		}
+		if(orbisPadGetButtonPressed(ORBISPAD_R2))
+		{
+			sys_log("R2 pressed\n");
+			
+		}
+		
 			
 	}
 }
@@ -147,7 +210,7 @@ void initApp()
 	if(ret==1)
 	{
 		
-	
+	    confPad=orbisPadGetConf();
 	
 		ret=orbis2dInit();
 		if(ret==1)
