@@ -1,3 +1,8 @@
+/*
+ * liborbis 
+ * Copyright (C) 2015,2016,2017 Antonio Jose Ramos Marquez (aka bigboss) @psxdev on twitter
+ * Repository https://github.com/psxdev/liborbis
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/param.h>
@@ -29,7 +34,7 @@ void orbis2dFinish()
 			sys_log("liborbis2d sceVideoOutClose return 0x%8x\n",ret);
 		}
 		orbconf->orbis2d_initialized=-1;
-		sys_log("liborbis2d finished");
+		sys_log("liborbis2d finished\n");
 	}
 }
 
@@ -164,6 +169,7 @@ void orbis2dStartDrawing()
 	orbis2dWaitFlipArg(&orbconf->flipQueue);
 
 }
+
 void orbis2dDrawPixelColor(int x, int y, uint32_t pixelColor)
 {
 	int color;
@@ -174,6 +180,86 @@ void orbis2dDrawPixelColor(int x, int y, uint32_t pixelColor)
 	
 	((uint32_t *)orbconf->surfaceAddr[orbconf->currentBuffer])[pixel]=color;
 
+}
+void orbis2dPutImage(uint32_t *buf,int x, int y, int w, int h)
+{
+	int x0, y0;
+	unsigned int R,G,B;
+	for(y0=0;y0<h-y;y0++) 
+	{
+		for(x0=0;x0<w-x;x0++) 
+		{
+			
+			//R=buf[y0*w+x0]&0xFF0000;
+			//G=buf[y0*w+x0]&0x00FF00;
+			//B=buf[y0*w+x0]&0x0000FF;
+			orbis2dDrawPixelColor(x0,y0,0x80<<24|buf[y0*w+x0]);
+		}
+	}
+}
+void orbis2dPutImage2(uint32_t *buf,int x, int y, int w, int h)
+{
+	int x0, y0;
+	unsigned int R,G,B,A;
+	for(y0=0;y0<h-y;y0++) 
+	{
+		for(x0=0;x0<w-x;x0++) 
+		{
+			A=(buf[y0*w+x0]&0xFF000000)>>24;
+			B=(buf[y0*w+x0]&0xFF0000)>>16;
+			G=(buf[y0*w+x0]&0x00FF00)>>8;
+			R=(buf[y0*w+x0]&0x0000FF);
+			orbis2dDrawPixelColor(x0,y0,A<<24|R<<16|G<<8|B);
+		}
+	}
+}
+void orbis2dPutImage3(uint32_t *buf,int x, int y, int w, int h)
+{
+	int x0, y0;
+	unsigned int R,G,B,A;
+	for(y0=0;y0<h-y;y0++) 
+	{
+		for(x0=0;x0<w-x;x0++) 
+		{
+			A=(buf[y0*w+x0]&0xFF000000)>>24;
+			B=(buf[y0*w+x0]&0xFF0000)>>16;
+			G=(buf[y0*w+x0]&0x00FF00)>>8;
+			R=(buf[y0*w+x0]&0x0000FF);
+			orbis2dDrawPixelColor(x0,y0,A<<24|B<<16|G<<8|R);
+		}
+	}
+}
+void orbis2dPutImage4(uint32_t *buf,int x, int y, int w, int h)
+{
+	int x0, y0;
+	unsigned int R,G,B,A;
+	for(y0=0;y0<h-y;y0++) 
+	{
+		for(x0=0;x0<w-x;x0++) 
+		{
+			A=(buf[y0*w+x0]&0xFF000000)>>24;
+			B=(buf[y0*w+x0]&0xFF0000)>>16;
+			G=(buf[y0*w+x0]&0x00FF00)>>8;
+			R=(buf[y0*w+x0]&0x0000FF);
+			orbis2dDrawPixelColor(x0,y0,0x80<<24|B<<16|G<<8|R);
+		}
+	}
+}
+void orbis2dPutImage5(uint32_t *buf,int x, int y, int w, int h)
+{
+	int x0, y0;
+	unsigned int R,G,B,A;
+	for(y0=0;y0<h-y;y0++) 
+	{
+		for(x0=0;x0<w-x;x0++) 
+		{
+			A=(buf[y0*w+x0]&0xFF000000)>>24;
+			B=(buf[y0*w+x0]&0xFF0000)>>16;
+			G=(buf[y0*w+x0]&0x00FF00)>>8;
+			R=(buf[y0*w+x0]&0x0000FF);
+			orbis2dDrawPixelColor(x0,y0,0x80<<24|R<<16|G<<8|B);
+		}
+	}
 }
 void orbis2dDrawRectColor(int x, int w, int y, int h, uint32_t color)
 {

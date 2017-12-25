@@ -1,3 +1,8 @@
+/*
+ * liborbis 
+ * Copyright (C) 2015,2016,2017 Antonio Jose Ramos Marquez (aka bigboss) @psxdev on twitter
+ * Repository https://github.com/psxdev/liborbis
+ */
 #include <stdint.h>
 
 #include <types/kernel.h>
@@ -44,6 +49,14 @@ typedef struct Orbis2dConfig
 	
 }Orbis2dConfig;
 
+typedef struct Orbis2dTexture
+{
+	uint32_t *datap;
+	unsigned int width;
+	unsigned int height;
+	unsigned int depth;
+}Orbis2dTexture;
+
 int orbis2dInit();
 void orbis2dFinish();
 int orbis2dInitWithConf(Orbis2dConfig *conf);
@@ -56,3 +69,15 @@ void orbis2dDrawRectColor(int x, int w, int y, int h, uint32_t color);
 void orbis2dWritePixelColor(int x, int y, uint32_t pixelColor);
 void orbis2dStartDrawing();
 void orbis2dFinishDrawing(int64_t flipArg);
+void orbis2dPutImage(uint32_t *buf,int x, int y, int w, int h);
+void orbis2dPutImage2(uint32_t *buf,int x, int y, int w, int h);
+void orbis2dPutImage3(uint32_t *buf,int x, int y, int w, int h);
+void orbis2dPutImage4(uint32_t *buf,int x, int y, int w, int h);
+void orbis2dPutImage5(uint32_t *buf,int x, int y, int w, int h);
+Orbis2dTexture * orbis2dCreateEmptyTexture(unsigned int w, unsigned int h);
+void orbis2dDestroyTexture(Orbis2dTexture *texture);
+uint32_t *orbis2dTextureGetDataPointer(Orbis2dTexture *texture);
+uint32_t orbis2dTextureGetStride(Orbis2dTexture *texture);
+Orbis2dTexture *orbis2dLoadPngFromBuffer(const void *buffer);
+Orbis2dTexture *orbis2dLoadPngFromHost(const char *filename);
+void orbis2dDrawTexture(Orbis2dTexture *texture,unsigned int x, unsigned int y);
