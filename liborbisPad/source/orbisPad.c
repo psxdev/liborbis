@@ -1,3 +1,8 @@
+/*
+ * liborbis 
+ * Copyright (C) 2015,2016,2017 Antonio Jose Ramos Marquez (aka bigboss) @psxdev on twitter
+ * Repository https://github.com/psxdev/liborbis
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -129,6 +134,10 @@ bool orbisPadGetButtonReleased(unsigned int filter)
 {
  	if((orbisPadConf->buttonsReleased&filter)==filter)
 	{
+		if(~(orbisPadConf->padDataLast->buttons)&filter)
+		{
+			return 0;
+		}
 		return 1;
 	}
 	return 0;
@@ -150,6 +159,11 @@ int orbisPadUpdate()
 		if(actualButtons!=lastButtons)
 		{
 			orbisPadConf->buttonsReleased=(~actualButtons)&(lastButtons);
+		}
+		else
+		{
+			orbisPadConf->buttonsReleased=0;
+			
 		}
 		orbisPadConf->buttonsHold=actualButtons&lastButtons;
 		return 0;
