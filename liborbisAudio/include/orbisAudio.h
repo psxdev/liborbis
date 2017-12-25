@@ -1,3 +1,8 @@
+/*
+ * liborbis 
+ * Copyright (C) 2015,2016,2017 Antonio Jose Ramos Marquez (aka bigboss) @psxdev on twitter
+ * Repository https://github.com/psxdev/liborbis
+ */
 #include <stdint.h>
 
 #include <types/kernel.h>
